@@ -1,0 +1,9 @@
+.omc/
+*.log
+*.orig
+*.rej
+*~
+
+# Proprietary firmware is not checked in.
+radio/
+prebuilt/stock-7.1.2.0G/

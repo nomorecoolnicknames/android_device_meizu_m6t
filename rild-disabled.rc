@@ -1,0 +1,2 @@
+# Intentionally empty: replaces the AOSP rild service, which crashes with the
+# stock MediaTek RIL blob.
