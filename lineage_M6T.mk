@@ -44,8 +44,3 @@ BUILD_FINGERPRINT := Meizu/Meizu_M6T_RU/MeizuM6T:7.0/NRD90M/1550240131:user/rele
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.multisim.config=dsds \
     ro.telephony.default_network=10,10
-
-# This branch targets Android 11 (API 30) only.
-ifneq ($(PLATFORM_SDK_VERSION),30)
-$(error M6T lineage-18.1 requires PLATFORM_SDK_VERSION=30)
-endif

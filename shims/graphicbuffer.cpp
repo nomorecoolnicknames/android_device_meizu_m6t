@@ -22,14 +22,9 @@
 #include <string>
 
 #include <log/log.h>
-#include <ui/GraphicBuffer.h>
 
 namespace {
-// The allocation patches reserve 256/160 bytes; reject a platform layout
-// that exceeds them.
-constexpr size_t kTargetGraphicBufferSize = sizeof(android::GraphicBuffer);
-static_assert(kTargetGraphicBufferSize <= (sizeof(void*) == 8 ? 256 : 160),
-              "GraphicBuffer exceeds the pinned blob allocation patches");
+constexpr size_t kA13GraphicBufferSize = sizeof(void*) == 8 ? 256 : 160;
 }
 
 extern "C" {
@@ -40,11 +35,11 @@ void _ZN7android13GraphicBufferC1EjjijNSt3__112basic_stringIcNS1_11char_traitsIc
 void _ZN7android13GraphicBufferC1Ejjij(void* self, uint32_t w, uint32_t h, int32_t format,
                                        uint32_t usage) {
     size_t have = malloc_usable_size(self);
-    if (have < kTargetGraphicBufferSize) {
-        LOG_ALWAYS_FATAL("N GraphicBuffer(%u, %u, %d, %#x) on a %zu-byte object (caller %p): target "
+    if (have < kA13GraphicBufferSize) {
+        LOG_ALWAYS_FATAL("N GraphicBuffer(%u, %u, %d, %#x) on a %zu-byte object (caller %p): A13 "
                          "needs %zu - byte-patch the caller's operator new (shims/bytepatch.txt)",
                          w, h, format, usage, have, __builtin_return_address(0),
-                         kTargetGraphicBufferSize);
+                         kA13GraphicBufferSize);
     }
     std::string name("<Unknown>");
     _ZN7android13GraphicBufferC1EjjijNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE(

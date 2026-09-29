@@ -129,7 +129,7 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service \
     android.hardware.gatekeeper@1.0-service.software \
-    android.hardware.drm@1.3-service.clearkey \
+    android.hardware.drm@1.4-service.clearkey \
     android.hardware.gnss@1.0-impl \
     android.hardware.gnss@1.0-service \
     android.hardware.camera.provider@2.4-impl \

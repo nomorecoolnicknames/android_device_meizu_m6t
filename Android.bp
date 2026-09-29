@@ -62,7 +62,7 @@ cc_library_shared {
         "shims/ui.cpp",
         "shims/graphicbuffer.cpp",
     ],
-    shared_libs: ["liblog", "libui"],
+    shared_libs: ["liblog"],
     allow_undefined_symbols: true,
 }
 
