@@ -1,6 +1,6 @@
 # Meizu M6T (M6T)
 
-Device tree for the Meizu M6T for LineageOS 18.1.
+Device tree for the Meizu M6T for LineageOS 20.0.
 
 ## Specifications
 
@@ -26,19 +26,24 @@ Device tree for the Meizu M6T for LineageOS 18.1.
 
 ## Building
 
-Sync the LineageOS 18.1 sources, place this tree at `device/meizu/M6T` and
-provide the external inputs:
+Initialize the LineageOS 20.0 sources and add the local manifest from
+[android_local_manifests_meizu](https://github.com/nomorecoolnicknames/android_local_manifests_meizu)
+(branch `lineage-20.0`) to `.repo/local_manifests/`:
+
+```sh
+repo init -u https://github.com/LineageOS/android.git -b lineage-20.0
+repo sync
+source build/envsetup.sh
+breakfast M6T
+brunch M6T
+```
+
+External inputs:
 
 - vendor blobs in `device/meizu/M6T/proprietary/` (paths in `vendor-blobs.mk`)
 - kernel source in `kernel/meizu/M6T` (used for headers)
 - prebuilt kernel at `device/meizu/M6T/prebuilt/Image.gz-dtb`
 - the matching legacy MediaTek framework/HAL adaptations
-
-```sh
-source build/envsetup.sh
-breakfast M6T
-brunch M6T
-```
 
 See the [ReMeizu project](https://github.com/nomorecoolnicknames/remeizu) for
 the related device, common and kernel trees.
