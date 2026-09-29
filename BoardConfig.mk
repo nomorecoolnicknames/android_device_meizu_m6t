@@ -63,6 +63,45 @@ AUDIOSERVER_MULTILIB := 32
 # cameraserver is 32-bit only here; publish CameraService from mediaserver.
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 
+# Shims
+# The camera blobs need legacy graphics symbols, and the stock vendor ICU must
+# coexist with system libraries that need ICU 58 symbols.
+TARGET_LD_SHIM_LIBS += \
+    /system/lib/libandroid_runtime.so|/system/lib/libicuuc.so \
+    /system/lib/libmedia.so|/system/lib/libicuuc.so \
+    /system/lib/libmedia.so|/system/lib/libicui18n.so \
+    /system/lib/libsqlite.so|/system/lib/libicuuc.so \
+    /system/lib/libsqlite.so|/system/lib/libicui18n.so \
+    /system/vendor/lib/libicui18n.so|/system/vendor/lib/libicuuc.so \
+    /system/vendor/lib/libxml2.so|/system/vendor/lib/libicuuc.so \
+    /system/vendor/lib/libcam_utils.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libcam.client.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libcam.camnode.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libeffecthal.base.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libjni_lomoeffect.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libvfb_render.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libMtkOmxVenc.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libmtk_mmutils.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libshowlogo.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libgui_ext.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib/libui_ext.so|/system/vendor/lib/libmtkshim_gui.so \
+    /system/vendor/lib64/libcam_utils.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libcam.client.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libcam.camnode.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libeffecthal.base.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libjni_lomoeffect.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libvfb_render.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libmtk_mmutils.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libgui_ext.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/vendor/lib64/libui_ext.so|/system/vendor/lib64/libmtkshim_gui.so \
+    /system/lib64/libandroid_runtime.so|/system/lib64/libicuuc.so \
+    /system/lib64/libmedia.so|/system/lib64/libicuuc.so \
+    /system/lib64/libmedia.so|/system/lib64/libicui18n.so \
+    /system/lib64/libsqlite.so|/system/lib64/libicuuc.so \
+    /system/lib64/libsqlite.so|/system/lib64/libicui18n.so \
+    /system/vendor/lib64/libicui18n.so|/system/vendor/lib64/libicuuc.so \
+    /system/vendor/lib64/libxml2.so|/system/vendor/lib64/libicuuc.so
+
 # Kernel
 # The stock 3.18.35 kernel is used as a prebuilt by default;
 # M6_KERNEL_FROM_SOURCE=true builds kernel/meizu/M6T/kernel-3.18 instead.
