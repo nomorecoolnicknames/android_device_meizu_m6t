@@ -1,4 +1,0 @@
-service ril-daemon /vendor/bin/hw/rild
-    class main
-    user root
-    group radio cache inet misc audio log readproc wakelock system

@@ -1,8 +1,5 @@
-# Proprietary files for the Meizu M6T (MT6750), from the stock firmware.
-# The full stock /system/vendor payload is used, not the whole stock /system.
-# Built from source instead: libion, libtinycompress, libgui and the default
-# power/sensors/memtrack HALs.
-# com.meizu.camera.xml is excluded: it needs Flyme framework parts.
+# Proprietary files for the Meizu M6T, from the Nougat stock firmware.
+# AOSP reference implementations that would shadow built modules are excluded.
 
 # Stock /system permissions and Meizu helpers
 etc/permissions/android.hardware.fingerprint.xml
@@ -54,7 +51,7 @@ lib64/libimsg_log.so:vendor/lib64/libimsg_log.so
 # libxml2 is built from source.
 lib/libbt-aptX-ARM-4.2.2.so
 lib/libcurl.so:vendor/lib/libcurl.so
-# libfs_mgr is built from source.
+# libfs_mgr is provided by a shim (shims/fs_mgr.c).
 
 # Telephony / RIL / modem / IMS
 vendor/bin/ccci_fsd
@@ -691,8 +688,6 @@ vendor/lib/libvt_socketbind.so
 vendor/lib/libvtmal.so
 vendor/lib/libwfo_jni.so
 vendor/lib/libwo.so
-vendor/lib/mediadrm/libdrmclearkeyplugin.so
-vendor/lib/mediadrm/libmockdrmcryptoplugin.so
 vendor/lib/mediadrm/libwvdrmengine.so
 vendor/lib64/drm/libdrmctaplugin.so
 vendor/lib64/drm/libdrmmtkplugin.so
@@ -767,5 +762,3 @@ vendor/lib64/libvt_avsync.so
 vendor/lib64/libwapi.so
 vendor/lib64/libwfo_jni.so
 vendor/lib64/libwo.so
-vendor/lib64/mediadrm/libdrmclearkeyplugin.so
-vendor/lib64/mediadrm/libmockdrmcryptoplugin.so

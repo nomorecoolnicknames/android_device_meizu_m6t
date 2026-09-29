@@ -1,9 +1,11 @@
-.omc/
-*.log
-*.orig
-*.rej
-*~
-
-# Proprietary firmware is not checked in.
-radio/
-prebuilt/stock-7.1.2.0G/
+# Vendor blobs are not checked in.
+*.so
+*.apk
+*.bin
+*.img
+*.ko
+*.dat
+*.fw
+# Vendor image blobs imported for vendor-blobs.mk; only the generated
+# makefile is versioned.
+/proprietary/

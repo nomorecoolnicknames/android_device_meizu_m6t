@@ -1,0 +1,216 @@
+# Modem, MUX and RIL services for the Meizu M6T.
+
+on post-fs-data
+    # gsm0710muxd links its pty slaves under /dev/radio.
+    mkdir /dev/radio 0770 radio radio
+
+    # /data/nvram is the bind-mounted /nvdata here (init.M6T.nvram.rc).
+    mkdir /data/nvram/md 0770 root system
+    mkdir /data/nvram/md3 0770 root system
+    mkdir /data/md3 0770 root system
+    mkdir /data/ccci_cfg 0770 system radio
+    restorecon_recursive /data/ccci_cfg
+    chown radio radio /sys/kernel/ccci/boot
+
+# Backup trigger for the MUX start; ccci_mdinit normally starts it.
+on property:mtk.md1.status=ready
+    start gsm0710muxd
+
+on property:ril.muxreport=1
+    start muxreport-daemon
+
+# CCCI modem file-system servers and modem image loaders, as on stock.
+
+# md1
+service ccci_fsd /vendor/bin/ccci_fsd 0
+    class core
+    user radio
+    group radio system
+    oneshot
+
+service ccci_mdinit /vendor/bin/ccci_mdinit 0
+    class core
+    user system
+    group radio system
+    oneshot
+
+# md3 / C2K
+service ccci3_fsd /vendor/bin/ccci_fsd 2
+    class core
+    user radio
+    group radio system
+    oneshot
+
+service ccci3_mdinit /vendor/bin/ccci_mdinit 2
+    class core
+    user system
+    group radio system
+    oneshot
+
+# 07.10 MUX
+service gsm0710muxd /vendor/bin/gsm0710muxd -s /dev/ttyC0 -f 512 -n 8 -m basic
+    class core
+    user root
+    group radio cache inet misc
+    disabled
+    oneshot
+
+# There is no md2, but ccci_mdinit references the name; keep it defined and
+# disabled.
+service gsm0710muxdmd2 /vendor/bin/gsm0710muxdmd2 -s /dev/ccci2_tty0 -f 512 -n 8 -m basic
+    class core
+    user root
+    group radio cache inet misc
+    disabled
+    oneshot
+
+service muxreport-daemon /vendor/bin/muxreport
+    class core
+    user radio
+    group radio cache inet misc
+    disabled
+    oneshot
+
+# RIL
+# Started by gsm0710muxd once the MUX channels are up. The framework only
+# speaks IRadio, so the AOSP rild loads the stock mtk-ril.so instead of the
+# Nougat socket RIL (mtkrild). The library is passed with -l, not
+# vendor.rild.libpath, so vendor.ril-daemon below does not load a second copy.
+# The socket set matches stock.
+service ril-daemon-mtk /vendor/bin/hw/rild -l mtk-ril.so
+    class core
+    socket mrild stream 660 root radio
+    socket mrild2 stream 660 root radio
+    socket mrild3 stream 660 root radio
+    socket mrild4 stream 660 root radio
+    socket rild-ims stream 660 root radio
+    socket rild-debug stream 660 radio system
+    socket rild-oem stream 660 radio system
+    socket rild-mtk-ut stream 660 radio net_bt
+    socket rild-mtk-ut-2 stream 660 radio net_bt
+    socket rild-mtk-modem stream 660 radio system
+    socket rild-atci stream 660 root radio
+    socket rild-mal stream 660 radio system
+    socket rild-mal-at stream 660 radio system
+    socket rild-vsim stream 660 root radio
+    socket rild-mbim stream 660 root radio
+    socket msap_uim_socket1 stream 660 radio radio
+    socket msap_uim_socket2 stream 660 radio radio
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw log system
+    disabled
+    # Not oneshot: ccci_mdinit does not restart a crashed RIL.
+
+# md2 RIL: defined and disabled because ccci_mdinit references it.
+service ril-daemon-mtkmd2 /vendor/bin/mtkrildmd2
+    class core
+    socket rild-md2 stream 660 root radio
+    socket rild2-md2 stream 660 root radio
+    socket rild-debug-md2 stream 660 radio system
+    socket rild-oem-md2 stream 660 radio system
+    socket rild-mtk-ut-md2 stream 660 radio net_bt
+    socket rild-mtk-ut-2-md2 stream 660 radio net_bt
+    socket rild-mtk-modem-md2 stream 660 radio system
+    socket rild-atci-md2 stream 660 root radio
+    socket rild-mal-md2 stream 660 radio system
+    socket rild-mal-at-md2 stream 660 radio system
+    socket rild-vsim-md2 stream 660 root radio
+    socket rild-mbim-md2 stream 660 root radio
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw log system
+    disabled
+    oneshot
+
+# GSM<->C2K request router of the Nougat socket framework. Defined because
+# ccci_mdinit watches init.svc.ril-proxy, but never started: it has no socket
+# peer here.
+service ril-proxy /vendor/bin/rilproxy -l mtk-rilproxy.so
+    class core
+    socket rild stream 660 root radio
+    socket rild2 stream 660 root radio
+    socket rild3 stream 660 root radio
+    socket rild4 stream 660 root radio
+    socket rilproxy-atci stream 660 root radio
+    socket rilproxy-ims stream 660 root radio
+    socket rilproxy-mal stream 660 radio system
+    socket sap_uim_socket1 stream 660 bluetooth bluetooth
+    socket sap_uim_socket2 stream 660 bluetooth bluetooth
+    socket sap_uim_socket3 stream 660 bluetooth bluetooth
+    socket sap_uim_socket4 stream 660 bluetooth bluetooth
+    socket embmsd stream 660 radio inet
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw log system
+    disabled
+    oneshot
+
+# C2K RIL, started by ccci_mdinit ("start c2k rild", ctl.start "viarild").
+# 32-bit blob with /vendor/lib/libviatelecom-withuim-ril.so (vendor-blobs.mk).
+# The SDIO tty argument is unused with eCCCI C2K. The stock "rild-debug"
+# socket is dropped; it collides with ril-daemon-mtk.
+service viarild /vendor/bin/viarild -l /vendor/lib/libviatelecom-withuim-ril.so -- -d /dev/ttySDIO4
+    class core
+    socket rild-via stream 660 radio radio
+    socket msap_c2k_socket1 stream 660 radio radio
+    socket msap_c2k_socket2 stream 660 radio radio
+    socket msap_c2k_socket3 stream 660 radio radio
+    socket msap_c2k_socket4 stream 660 radio radio
+    socket rpc stream 660 radio system
+    socket rild-ctclient stream 660 radio system
+    socket rild-atci-c2k stream 660 radio system
+    group radio cache inet misc audio sdcard_r sdcard_rw log system
+    disabled
+    oneshot
+
+# Telephony Early Read
+service terservice /vendor/bin/terservice
+    class core
+    user radio
+    group radio cache inet misc
+    oneshot
+
+# Override the AOSP vendor.ril-daemon from rild.rc: this file is parsed
+# first, so this definition wins. It stays harmless because
+# vendor.rild.libpath is not set.
+service vendor.ril-daemon /vendor/bin/hw/rild
+    class main
+    user radio
+    group radio cache inet misc audio log readproc wakelock
+    disabled
+    oneshot
+
+# Modem loggers, disabled. ccci_mdinit starts them on an early modem
+# exception.
+service mdlogger /vendor/bin/mdlogger
+    class main
+    user shell
+    group shell system radio sdcard_rw inet sdcard_r media_rw
+    disabled
+    oneshot
+
+service emdlogger1 /vendor/bin/emdlogger1
+    class main
+    user shell
+    group system shell radio sdcard_rw inet sdcard_r media_rw
+    disabled
+    oneshot
+
+service emdlogger2 /vendor/bin/emdlogger2
+    class main
+    user shell
+    group system shell radio sdcard_rw inet sdcard_r media_rw
+    disabled
+    oneshot
+
+service emdlogger3 /vendor/bin/emdlogger3
+    class main
+    user shell
+    group system shell radio sdcard_rw inet sdcard_r media_rw
+    disabled
+    oneshot
+
+service emdlogger5 /vendor/bin/emdlogger5
+    class main
+    user shell
+    group system shell radio sdcard_rw inet sdcard_r media_rw
+    disabled
+    oneshot

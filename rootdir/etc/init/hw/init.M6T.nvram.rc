@@ -1,0 +1,40 @@
+# NVRAM for the Meizu M6T.
+
+on post-fs-data
+    chown root system /nvdata
+    chmod 0771 /nvdata
+    restorecon_recursive /nvdata
+
+    mkdir /data/nvram 0771 root system
+    mount none /nvdata /data/nvram bind
+    chown root system /data/nvram
+    chmod 0771 /data/nvram
+
+    # libnvram reads /data/nvram/fstab.${ro.hardware} to find the raw /nvram
+    # partition. The ramdisk copy is gone after switch_root, so copy it from
+    # /vendor/etc.
+    copy /vendor/etc/fstab.mt6755 /data/nvram/fstab.mt6755
+    chown root root /data/nvram/fstab.mt6755
+    chmod 0644 /data/nvram/fstab.mt6755
+
+    # Audio calibration records are read by audioserver (group media).
+    mkdir /data/nvram/media 0770 root media
+    mkdir /data/nvram/APCFG 0771 root system
+    mkdir /data/nvram/APCFG/APRDCL 0771 root system
+    mkdir /data/nvram/APCFG/APRDEB 0771 root system
+    restorecon_recursive /data/nvram
+
+# 32-bit blob. Sets service.nvram_init=Ready.
+service nvram_daemon /vendor/bin/nvram_daemon
+    class main
+    user root
+    group system
+    oneshot
+
+# Registers the "NvRAMAgent" binder service used by MediaTek apps and some
+# HALs. It uses the framework servicemanager from a vendor process, which
+# needs permissive SELinux.
+service NvRAMAgent /vendor/bin/nvram_agent_binder
+    class main
+    user system
+    group system

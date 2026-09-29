@@ -1,0 +1,24 @@
+# Thermal services for the Meizu M6T.
+
+service thermalloadalgod /vendor/bin/thermalloadalgod
+    class main
+    user system
+    group system
+
+service thermal_manager /vendor/bin/thermal_manager
+    class main
+    user root
+    group system
+    oneshot
+
+# Modem TX power throttling through the CCCI nodes.
+service thermal /vendor/bin/thermal
+    class main
+    user system
+    group system
+
+# Registers with /proc/driver/thermal/clsd_pid and clmutt_tmd_pid.
+service thermald /vendor/bin/thermald
+    class main
+    user system
+    group system

@@ -1,0 +1,135 @@
+// Soong namespace for the M6T device tree.
+//
+// Without a soong_namespace every module here would land in the root
+// namespace, which is always exported to Make, and get install rules in every
+// product of the workspace. A namespace is only exported to products that
+// list it in PRODUCT_SOONG_NAMESPACES (see device.mk). Modules inside it can
+// still depend on root-namespace modules.
+soong_namespace {
+}
+
+// Shims
+//
+// Vendor-side stand-ins for libraries the Nougat blobs need and a vendor
+// process cannot load from /system. Installed by device.mk.
+
+cc_defaults {
+    name: "M6T_shim_defaults",
+    vendor: true,
+    cflags: ["-Wno-unused-parameter"],
+}
+
+// /vendor/lib{,64}/libgui.so: libgui is VNDK-private, but the blobs need the
+// plain name libgui.so. An empty library whose only content is DT_NEEDED on
+// libgui_vendor, so all consumers bind to the one libgui_vendor.
+cc_library_shared {
+    name: "libgui_fwd_M6T",
+    defaults: ["M6T_shim_defaults"],
+    stem: "libgui",
+    srcs: ["shims/stub.c"],
+    shared_libs: ["libgui_vendor"],
+}
+
+// /vendor/lib{,64}/libfs_mgr.so: Nougat-ABI fstab reader for libnvram.so,
+// which imports fs_mgr_read_fstab, fs_mgr_get_entry_for_mount_point and
+// fs_mgr_free_fstab. The platform builds libfs_mgr only as a static library.
+cc_library_shared {
+    name: "libfs_mgr_shim_M6T",
+    defaults: ["M6T_shim_defaults"],
+    stem: "libfs_mgr",
+    srcs: ["shims/fs_mgr.c"],
+}
+
+// Nougat-ABI shims shared with the m95 tree; they implement the symbols the
+// display, audio and RIL blobs miss. Which blob needs which shim is written
+// into the blob copies by patchelf at import time (shims/wiring.txt).
+
+cc_library_shared {
+    name: "libM6Tshim_gui",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/gui.cpp"],
+    shared_libs: ["liblog"],
+    allow_undefined_symbols: true,
+}
+
+// graphicbuffer.cpp provides the Nougat GraphicBuffer(w, h, format, uint32
+// usage) constructor that libui_ext calls. Its callers are byte-patched to
+// allocate the current object size (shims/bytepatch.txt).
+cc_library_shared {
+    name: "libM6Tshim_ui",
+    defaults: ["M6T_shim_defaults"],
+    srcs: [
+        "shims/ui.cpp",
+        "shims/graphicbuffer.cpp",
+    ],
+    shared_libs: ["liblog", "libui"],
+    allow_undefined_symbols: true,
+}
+
+cc_library_shared {
+    name: "libM6Tshim_sf",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/sf.cpp"],
+}
+
+cc_library_shared {
+    name: "libM6Tshim_utils",
+    defaults: ["M6T_shim_defaults"],
+    srcs: [
+        "shims/utils.cpp",
+        "shims/propertymap.cpp",
+    ],
+    shared_libs: ["libutils"],
+    allow_undefined_symbols: true,
+}
+
+cc_library_shared {
+    name: "libM6Tshim_audioutils",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/audioutils.cpp"],
+    allow_undefined_symbols: true,
+}
+
+// android::Region with the Nougat object layout for the Mali EGL driver, which
+// replaces its libui.so dependency (wiring.txt). The driver allocates 32-byte
+// objects and reads the fields directly; see region.cpp.
+cc_library_shared {
+    name: "libM6Tshim_region",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/region.cpp"],
+    header_libs: ["libutils_headers", "liblog_headers"],
+    shared_libs: ["liblog"],
+    cflags: ["-fvisibility=hidden"],
+}
+
+cc_library_shared {
+    name: "libM6Tshim_net",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/net.c"],
+}
+
+cc_library_shared {
+    name: "libM6Tshim_power",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/power.cpp"],
+}
+
+// /vendor/lib{,64}/libnetd_client.so: mtk-ril and mtk-rilmd2 need it by name
+// for protectFromVpn. setNetworkForSocket forwards to the LLNDK
+// android_setsocknetwork.
+cc_library_shared {
+    name: "libM6Tshim_netd_client",
+    defaults: ["M6T_shim_defaults"],
+    stem: "libnetd_client",
+    srcs: ["shims/netd_client.c"],
+    shared_libs: ["libandroid_net"],
+}
+
+// SSLv3_{client,server}_method for mtk_agpsd and libcurl-ss: BoringSSL dropped
+// SSLv3, so map them to TLS_*_method.
+cc_library_shared {
+    name: "libM6Tshim_ssl",
+    defaults: ["M6T_shim_defaults"],
+    srcs: ["shims/ssl.c"],
+    shared_libs: ["libssl"],
+}

@@ -1,0 +1,46 @@
+# Connectivity (WMT, GPS) for the Meizu M6T.
+
+on post-fs-data
+    # GPS power control
+    chown gps gps /sys/class/gpsdrv/gps/pwrctl
+    chown gps gps /sys/class/gpsdrv/gps/suspend
+    chown gps gps /sys/class/gpsdrv/gps/state
+    chown gps gps /sys/class/gpsdrv/gps/pwrsave
+    chown gps gps /sys/class/gpsdrv/gps/status
+
+    # mnld / agpsd data and socket directories
+    mkdir /data/gps_mnl 0771 gps system
+    mkdir /data/misc/gps 0770 gps system
+    mkdir /data/agps_supl 0771 gps system
+    mkdir /data/mpe_mnl 0771 gps system
+
+# WMT: wmt_loader probes the chip through /dev/wmtdetect and exits;
+# wmt_launcher stays resident and loads the ROM patches through /dev/stpwmt.
+# Wi-Fi, Bluetooth, GPS and FM all need both.
+service wmt_loader /vendor/bin/wmt_loader
+    class core
+    user root
+    group root
+    oneshot
+
+# Stock arguments; "-n <patch>" makes it exit with usage.
+service wmt_launcher /vendor/bin/wmt_launcher -p /vendor/firmware/
+    class core
+    user system
+    group system
+
+# GPS: the gps.mt6750 HAL talks to mnld over its socket.
+service mnld /vendor/bin/mnld
+    class main
+    user gps
+    group gps inet misc sdcard_rw sdcard_r media_rw system radio
+    socket mnld stream 660 gps system
+
+# AGPS / SUPL
+service agpsd /vendor/bin/mtk_agpsd
+    class main
+    socket agpsd stream 660 gps system
+    socket agpsd2 stream 660 gps inet
+    socket agpsd3 stream 660 gps inet
+    user gps
+    group gps radio inet sdcard_r sdcard_rw misc system

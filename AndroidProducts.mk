@@ -1,7 +1,11 @@
-# Use the explicit name:path form; a path-only entry derives the product
-# name from the file name.
+#
+# Copyright (C) 2026 The LineageOS Project
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 PRODUCT_MAKEFILES := \
-    lineage_M6T:$(LOCAL_DIR)/lineage.mk
+    $(LOCAL_DIR)/lineage_M6T.mk
 
 COMMON_LUNCH_CHOICES := \
     lineage_M6T-userdebug \

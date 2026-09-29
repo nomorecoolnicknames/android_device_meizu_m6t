@@ -1,0 +1,209 @@
+# Board init for the Meizu M6T (MT6750).
+
+import /vendor/etc/init/hw/init.mt6755.usb.rc
+# Keep nvram before modem: the /data/nvram bind mount must exist before the
+# modem rc creates /data/nvram/md*. Actions run in import order.
+import /vendor/etc/init/hw/init.M6T.nvram.rc
+import /vendor/etc/init/hw/init.M6T.modem.rc
+import /vendor/etc/init/hw/init.M6T.tee.rc
+import /vendor/etc/init/hw/init.M6T.connectivity.rc
+import /vendor/etc/init/hw/init.M6T.thermal.rc
+# init.M6T.sensors.rc lives in /vendor/etc/init and is parsed automatically.
+
+on early-init
+    # Boot-time CPU floor (cluster 1 at 1.508 GHz, one core), released at
+    # sys.boot_completed.
+    write /proc/ppm/policy/userlimit_min_cpu_freq "1 1508000"
+    write /proc/ppm/policy/userlimit_min_cpu_core "1 1"
+
+    # debugfs: memtrack.mt6750 reads /sys/kernel/debug/ion/clients and
+    # /sys/kernel/debug/mali0/gpu_memory.
+    mount debugfs debugfs /sys/kernel/debug
+    chmod 0755 /sys/kernel/debug
+    # atrace.rc's chmod runs too late on this device.
+    chmod 0222 /sys/kernel/debug/tracing/trace_marker
+
+    # The 3.18 kernel dumps registers for every unknown syscall; keep
+    # ENOSYS without the dumps.
+    write /proc/sys/debug/exception-trace 0
+
+on init
+    # The Mali Midgard r12 driver faults with the Skia-GL RenderEngine; use
+    # the GLES backend. Set here because debug.* in vendor build.prop is
+    # dropped.
+    setprop debug.renderengine.backend gles
+
+    # The camera-daemon cpuset used by cameraserver and the camera provider
+    # is not created by the platform init.rc.
+    mkdir /dev/cpuset/camera-daemon 0755 system system
+    copy /dev/cpuset/cpus /dev/cpuset/camera-daemon/cpus
+    copy /dev/cpuset/mems /dev/cpuset/camera-daemon/mems
+    chown system system /dev/cpuset/camera-daemon/tasks
+    chmod 0664 /dev/cpuset/camera-daemon/tasks
+
+    chown root system /proc/lk_env
+    chmod 0660 /proc/lk_env
+
+on fs
+    # Use the installed fstab: the ramdisk copy is gone after switch_root.
+    # Mount points for the NV partitions come from BOARD_ROOT_EXTRA_FOLDERS.
+    mount_all /vendor/etc/fstab.mt6755
+
+on post-fs
+    chown system system /proc/bootprof
+    chmod 0664 /proc/bootprof
+    chown system system /protect_f
+    chmod 0770 /protect_f
+    chown system system /protect_s
+    chmod 0770 /protect_s
+    # Relabel the NV mounts; a freshly formatted ext4 comes up unlabeled.
+    restorecon_recursive /protect_f
+    restorecon_recursive /protect_s
+
+on post-fs-data
+    # zram
+    swapon_all /vendor/etc/fstab.mt6755
+
+    # Thermal policy store (/data/.tp/.settings).
+    mkdir /data/.tp 0775 system system
+
+on boot
+    # Framebuffer blank control
+    chown system graphics /sys/class/graphics/fb0/blank
+    chmod 0660 /sys/class/graphics/fb0/blank
+
+    # LEDs (lights.mt6750 writes the triggers and mx-led).
+    chmod 0664 /sys/class/leds/lcd-backlight/brightness
+    chown system system /sys/class/leds/lcd-backlight/trigger
+    chown system system /sys/class/leds/red/trigger
+    chown system system /sys/class/leds/green/trigger
+    chown system system /sys/class/leds/blue/trigger
+    chown system system /sys/class/leds/mx-led/brightness
+    chown system system /sys/class/leds/mx-led/blink
+    chmod 0664 /sys/class/leds/mx-led/brightness
+    chmod 0664 /sys/class/leds/mx-led/blink
+
+    # GED HAL nodes for ged_srv.
+    chown system system /sys/kernel/debug/ged/hal/total_gpu_freq_level_count
+    chmod 0660 /sys/kernel/debug/ged/hal/total_gpu_freq_level_count
+    chown system system /sys/kernel/debug/ged/hal/custom_boost_gpu_freq
+    chmod 0660 /sys/kernel/debug/ged/hal/custom_boost_gpu_freq
+    chown system system /sys/kernel/debug/ged/hal/custom_upbound_gpu_freq
+    chmod 0660 /sys/kernel/debug/ged/hal/custom_upbound_gpu_freq
+    chown system system /sys/kernel/debug/ged/hal/event_notify
+    chmod 0660 /sys/kernel/debug/ged/hal/event_notify
+    chown system system /sys/kernel/debug/ged/hal/fps_upper_bound
+    chmod 0660 /sys/kernel/debug/ged/hal/fps_upper_bound
+
+# Force touch (i2c 1-0068) and accelerometer/proximity calibration nodes.
+on boot
+    chown system system /sys/bus/i2c/devices/1-0068/button_enable
+    chmod 0660 /sys/bus/i2c/devices/1-0068/button_enable
+    chown system system /sys/bus/i2c/devices/1-0068/force_data
+    chmod 0660 /sys/bus/i2c/devices/1-0068/force_data
+    chown system system /sys/bus/i2c/devices/1-0068/g_count
+    chmod 0660 /sys/bus/i2c/devices/1-0068/g_count
+    chown system system /sys/bus/i2c/devices/1-0068/intercept
+    chmod 0660 /sys/bus/i2c/devices/1-0068/intercept
+    chown system system /sys/bus/i2c/devices/1-0068/touch_threshold
+    chmod 0660 /sys/bus/i2c/devices/1-0068/touch_threshold
+    chown system system /sys/bus/i2c/devices/1-0068/release_threshold
+    chmod 0660 /sys/bus/i2c/devices/1-0068/release_threshold
+    chown system system /sys/bus/i2c/devices/1-0068/sensor_data
+    chmod 0660 /sys/bus/i2c/devices/1-0068/sensor_data
+    chown system system /sys/bus/i2c/devices/1-0068/set_calib
+    chmod 0660 /sys/bus/i2c/devices/1-0068/set_calib
+    chown system system /sys/class/meizu/acc/acc_calibration
+    chmod 0664 /sys/class/meizu/acc/acc_calibration
+    chown system system /sys/class/meizu/acc/acc_x_offset
+    chmod 0664 /sys/class/meizu/acc/acc_x_offset
+    chown system system /sys/class/meizu/acc/acc_x_calibbias
+    chmod 0664 /sys/class/meizu/acc/acc_x_calibbias
+    chown system system /sys/class/meizu/acc/acc_y_offset
+    chmod 0664 /sys/class/meizu/acc/acc_y_offset
+    chown system system /sys/class/meizu/acc/acc_y_calibbias
+    chmod 0664 /sys/class/meizu/acc/acc_y_calibbias
+    chown system system /sys/class/meizu/acc/acc_z_offset
+    chmod 0664 /sys/class/meizu/acc/acc_z_offset
+    chown system system /sys/class/meizu/acc/acc_z_calibbias
+    chmod 0664 /sys/class/meizu/acc/acc_z_calibbias
+    chown system system /sys/class/meizu/ps/ps_calibration
+    chmod 0664 /sys/class/meizu/ps/ps_calibration
+    chown system system /sys/class/meizu/ps/ps_offset
+    chmod 0664 /sys/class/meizu/ps/ps_offset
+    chown system system /sys/class/meizu/ps/ps_calibbias
+    chmod 0664 /sys/class/meizu/ps/ps_calibbias
+
+on property:sys.boot_completed=1
+    # Release the early-init CPU floor.
+    write /proc/ppm/policy/userlimit_min_cpu_freq "1 -1"
+    write /proc/ppm/policy/userlimit_min_cpu_core "1 -1"
+
+# Display
+# Second-stage boot logo.
+service bootlogoupdater /vendor/bin/boot_logo_updater
+    class core
+    oneshot
+
+# MediaTek picture quality, ambient-light adaptation and GED GPU DVFS
+# daemons. Disabled by default; starting PQ early can break the display.
+# Opt in with:
+#   setprop persist.vendor.M6T.pq 1      (0 stops it)
+#   setprop persist.vendor.M6T.aal 1
+#   setprop persist.vendor.M6T.ged 1
+service pq /vendor/bin/pq
+    class main
+    user system
+    group system graphics
+    disabled
+
+service aal /vendor/bin/aal
+    class main
+    user system
+    group system graphics
+    disabled
+
+service ged_srv /vendor/bin/ged_srv
+    class core
+    user system
+    group system readproc
+    disabled
+
+on property:persist.vendor.M6T.pq=1
+    start pq
+
+on property:persist.vendor.M6T.pq=0
+    stop pq
+
+on property:persist.vendor.M6T.aal=1
+    start aal
+
+on property:persist.vendor.M6T.aal=0
+    stop aal
+
+on property:sys.boot_completed=1 && property:persist.vendor.M6T.ged=1
+    start ged_srv
+
+on property:persist.vendor.M6T.ged=0
+    stop ged_srv
+
+# Power
+# SPM (sleep power manager) firmware loader; without it the SoC has no
+# deep-idle/suspend firmware.
+service spm_script /vendor/bin/spm_loader
+    class core
+    user root
+    group root
+    oneshot
+
+# Fuel gauge daemon (32-bit, loads /vendor/lib/libfgauge.so).
+service fuelgauged /vendor/bin/fuelgauged
+    class main
+    user root
+    group root
+
+service fuelgauged_nvram /vendor/bin/fuelgauged_nvram
+    class main
+    user root
+    group root
+    oneshot

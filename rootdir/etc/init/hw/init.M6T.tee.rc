@@ -1,0 +1,39 @@
+# MicroTrust TEE for the Meizu M6T.
+
+on post-fs-data
+    # teei_daemon uses /data/thh/system and /data/thh/tee_00..0F.
+    mkdir /data/thh 0755 system system
+    mkdir /data/thh/system 0755 system system
+    mkdir /data/thh/tee 0755 system system
+    mkdir /data/thh/tee/tas 0755 system system
+    mkdir /data/thh/tee_00 0755 system system
+    mkdir /data/thh/tee_01 0755 system system
+    mkdir /data/thh/tee_02 0755 system system
+    mkdir /data/thh/tee_03 0755 system system
+    mkdir /data/thh/tee_04 0755 system system
+    mkdir /data/thh/tee_05 0755 system system
+    mkdir /data/thh/tee_06 0755 system system
+    mkdir /data/thh/tee_07 0755 system system
+    mkdir /data/thh/tee_08 0755 system system
+    mkdir /data/thh/tee_09 0755 system system
+    mkdir /data/thh/tee_0A 0755 system system
+    mkdir /data/thh/tee_0B 0755 system system
+    mkdir /data/thh/tee_0C 0755 system system
+    mkdir /data/thh/tee_0D 0755 system system
+    mkdir /data/thh/tee_0E 0755 system system
+    mkdir /data/thh/tee_0F 0755 system system
+    restorecon_recursive /data/thh
+    setprop soter.encrypt.state OK
+    start teei_daemon
+
+# Sets soter.teei.init=INIT_OK when the TEE is up.
+service teei_daemon /vendor/bin/teei_daemon
+    class core
+    user system
+    group system
+    disabled
+
+# keymaster@3.0-service starts before the TEE is up; restart it once the TEE
+# is ready.
+on property:soter.teei.init=INIT_OK
+    start vendor.keymaster-3-0

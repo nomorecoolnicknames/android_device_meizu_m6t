@@ -1,0 +1,42 @@
+# Vendor properties for the Meizu M6T (/vendor/build.prop).
+
+# Display
+ro.sf.lcd_density=320
+
+# RIL
+# The argument string contains a space, so it is set here.
+rild.libpath=mtk-ril.so
+rild.libargs=-d /dev/ttyC0
+# rild reads the vendor.-prefixed name. The library is passed with -l in
+# init.M6T.modem.rc instead of vendor.rild.libpath, so the AOSP
+# vendor.ril-daemon does not load a second mtk-ril.so.
+vendor.rild.libargs=-d /dev/ttyC0
+
+# HW modules
+# The blobs are named *.mt6750.so, except hwcomposer, which is mt6755.
+ro.hardware.gralloc=mt6750
+ro.hardware.hwcomposer=mt6755
+ro.hardware.audio.primary=mt6750
+ro.hardware.camera=mt6750
+ro.hardware.gps=mt6750
+ro.hardware.lights=mt6750
+ro.hardware.keystore=mt6750
+ro.hardware.gatekeeper=mt6750
+
+# Rotation
+# The kernel config sets CONFIG_MTK_LCM_PHYSICAL_ROTATION_HW, which already
+# flips the panel in the display path; fix an inverted UI in the kernel.
+ro.sf.hwrotation=0
+
+# Keep AEE/ipanic dumps enabled (expdb).
+persist.mtk.aee.aed=on
+
+# VINTF
+# FCM 3 has no entry for 3.18 kernels; skip only the kernel part of the
+# build consistency check to avoid the "internal problem" dialog at boot.
+ro.vendor.vintf.legacy_kernel=true
+
+# Audio
+# The primary audio HAL is built against the Android 7 audio.h; this selects
+# the matching audio_hw_device layout.
+ro.vendor.audio.legacy_nougat_abi=1

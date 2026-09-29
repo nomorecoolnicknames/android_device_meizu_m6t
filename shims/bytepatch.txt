@@ -1,0 +1,7 @@
+# Resize the Nougat "new GraphicBuffer" allocations in libui_ext to the current
+# object size (see shims/graphicbuffer.cpp): 232/136 -> 256/160 bytes.
+# Format: <file> <offset> <old bytes> <new bytes>; old bytes are verified.
+lib64/libui_ext.so 0x6254 001d8052 00208052   # new(232)->new(256) before _ZN7android13GraphicBufferC1Ejjij at 0x6270
+lib64/libui_ext.so 0x6384 001d8052 00208052   # new(232)->new(256) before _ZN7android13GraphicBufferC1Ejjij at 0x63a4
+lib/libui_ext.so 0x51cc 8820 a020   # new(136)->new(160) before _ZN7android13GraphicBufferC1Ejjij at 0x51e6
+lib/libui_ext.so 0x5298 8820 a020   # new(136)->new(160) before _ZN7android13GraphicBufferC1Ejjij at 0x52b0

@@ -1,172 +1,51 @@
+# Copyright (C) 2026 The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+# lineage_M6T.mk - Meizu M6T (M6T / M811H), MediaTek MT6750
+
+# arm64 with a 32-bit second ABI.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
+
 # Inherit from the device configuration.
-$(call inherit-product, $(LOCAL_PATH)/device_M6T.mk)
+$(call inherit-product, device/meizu/M6T/device.mk)
 
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
-# OTA install tools
-PRODUCT_COPY_FILES += \
-    vendor/lineage/prebuilt/common/bin/backuptool.sh:install/bin/backuptool.sh \
-    vendor/lineage/prebuilt/common/bin/backuptool.functions:install/bin/backuptool.functions
-
-PRODUCT_VERSION_MAJOR := 15
-PRODUCT_VERSION_MINOR := 1
-PRODUCT_VERSION_MAINTENANCE := 0
-LINEAGE_BUILDTYPE := UNOFFICIAL
-LINEAGE_BUILD := M6T
-LINEAGE_VERSION := 15.1-UNOFFICIAL-M6T
-LINEAGE_DISPLAY_VERSION := $(LINEAGE_VERSION)
-LINEAGE_PLATFORM_SDK_VERSION := 9
-LINEAGE_PLATFORM_REV := 0
-
-PRODUCT_NAME := lineage_M6T
+# Device identifier. The codename is case-sensitive.
 PRODUCT_DEVICE := M6T
-PRODUCT_BRAND := meizu
-PRODUCT_MANUFACTURER := Meizu
-PRODUCT_MODEL := M6T
-PRODUCT_RELEASE_NAME := M6T
-TARGET_OTA_ASSERT_DEVICE := M6T
-PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRODUCT_NAME=lineage_M6T \
-    PRODUCT_DEVICE=M6T \
-    TARGET_DEVICE=M6T
-
-# Boot diagnostics
-PRODUCT_COPY_FILES += \
-    device/meizu/M6T/forge-bootdiag.sh:system/bin/forge-bootdiag.sh
-
-# LineageOS settings provider and launcher
-PRODUCT_PACKAGES += \
-    LineageSettingsProvider \
-    Trebuchet
-
-# Leave out the AOSP sample apps.
-PRODUCT_PACKAGES := $(filter-out Home Recorder,$(PRODUCT_PACKAGES))
-
-# Device identifier
 PRODUCT_NAME := lineage_M6T
-PRODUCT_DEVICE := M6T
-PRODUCT_BRAND := meizu
-PRODUCT_MANUFACTURER := Meizu
+PRODUCT_BRAND := Meizu
 PRODUCT_MODEL := M6T
-PRODUCT_RELEASE_NAME := M6T
-TARGET_OTA_ASSERT_DEVICE := M6T
-PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRODUCT_NAME=lineage_M6T \
-    PRODUCT_DEVICE=M6T \
-    TARGET_DEVICE=M6T
-# Drop default HALs after all product inheritance.
-PRODUCT_PACKAGES := $(filter-out \
-    audio.primary.default \
-    audio.primary.goldfish \
-    audio_policy.default \
-    audio_policy.goldfish \
-    gralloc.default \
-    gralloc.goldfish \
-    gralloc.ranchu \
-    camera.goldfish \
-    camera.goldfish.jpeg \
-    camera.ranchu \
-    camera.ranchu.jpeg \
-    fingerprint.goldfish \
-    fingerprint.ranchu \
-    gps.goldfish \
-    gps.ranchu \
-    lights.goldfish \
-    power.goldfish \
-    sensors.goldfish \
-    sensors.ranchu \
-    vibrator.goldfish, \
-    $(PRODUCT_PACKAGES))
-PRODUCT_COPY_FILES := $(filter-out \
-    device/generic/goldfish/% \
-    device/generic/mini-emulator-% \
-    device/google/atv/init.goldfish.rc:% \
-    %:root/fstab.goldfish \
-    %:root/fstab.ranchu \
-    %:root/init.goldfish.rc \
-    %:root/init.ranchu.rc \
-    %:root/ueventd.goldfish.rc \
-    %:root/ueventd.ranchu.rc \
-    %:system/etc/init.goldfish.sh \
-    %:system/usr/idc/goldfish_rotary.idc \
-    %:system/etc/permissions/com.meizu.camera.xml \
-    %:system/lib/hw/audio.primary.default.so \
-    %:system/lib64/hw/audio.primary.default.so \
-    %:system/vendor/lib/hw/audio.primary.default.so \
-    %:system/vendor/lib64/hw/audio.primary.default.so \
-    %:system/lib/hw/audio.primary.goldfish.so \
-    %:system/lib64/hw/audio.primary.goldfish.so \
-    %:system/vendor/lib/hw/audio.primary.goldfish.so \
-    %:system/vendor/lib64/hw/audio.primary.goldfish.so \
-    %:system/lib/hw/audio_policy.default.so \
-    %:system/lib64/hw/audio_policy.default.so \
-    %:system/vendor/lib/hw/audio_policy.default.so \
-    %:system/vendor/lib64/hw/audio_policy.default.so \
-    %:system/lib/hw/audio_policy.goldfish.so \
-    %:system/lib64/hw/audio_policy.goldfish.so \
-    %:system/vendor/lib/hw/audio_policy.goldfish.so \
-    %:system/vendor/lib64/hw/audio_policy.goldfish.so \
-    %:system/lib/hw/gralloc.default.so \
-    %:system/lib64/hw/gralloc.default.so \
-    %:system/vendor/lib/hw/gralloc.default.so \
-    %:system/vendor/lib64/hw/gralloc.default.so \
-    %:system/lib/hw/gralloc.goldfish.so \
-    %:system/lib64/hw/gralloc.goldfish.so \
-    %:system/vendor/lib/hw/gralloc.goldfish.so \
-    %:system/vendor/lib64/hw/gralloc.goldfish.so \
-    %:system/lib/hw/gralloc.ranchu.so \
-    %:system/lib64/hw/gralloc.ranchu.so \
-    %:system/vendor/lib/hw/gralloc.ranchu.so \
-    %:system/vendor/lib64/hw/gralloc.ranchu.so \
-    %:system/lib/hw/camera.goldfish.so \
-    %:system/lib64/hw/camera.goldfish.so \
-    %:system/lib/hw/camera.goldfish.jpeg.so \
-    %:system/lib64/hw/camera.goldfish.jpeg.so \
-    %:system/lib/hw/camera.ranchu.so \
-    %:system/lib64/hw/camera.ranchu.so \
-    %:system/lib/hw/camera.ranchu.jpeg.so \
-    %:system/lib64/hw/camera.ranchu.jpeg.so \
-    %:system/lib/hw/fingerprint.goldfish.so \
-    %:system/lib64/hw/fingerprint.goldfish.so \
-    %:system/lib/hw/fingerprint.ranchu.so \
-    %:system/lib64/hw/fingerprint.ranchu.so \
-    %:system/lib/hw/gps.goldfish.so \
-    %:system/lib64/hw/gps.goldfish.so \
-    %:system/lib/hw/gps.ranchu.so \
-    %:system/lib64/hw/gps.ranchu.so \
-    %:system/lib/hw/lights.goldfish.so \
-    %:system/lib64/hw/lights.goldfish.so \
-    %:system/lib/hw/power.goldfish.so \
-    %:system/lib64/hw/power.goldfish.so \
-    %:system/lib/hw/sensors.goldfish.so \
-    %:system/lib64/hw/sensors.goldfish.so \
-    %:system/lib/hw/sensors.ranchu.so \
-    %:system/lib64/hw/sensors.ranchu.so \
-    %:system/lib/hw/vibrator.goldfish.so \
-    %:system/lib64/hw/vibrator.goldfish.so \
-    %:system/vendor/lib/hw/gralloc.mt6755.so \
-    %:system/vendor/lib64/hw/gralloc.mt6755.so \
-    %:system/vendor/lib/hw/hwcomposer.mt6755.so \
-    %:system/vendor/lib64/hw/hwcomposer.mt6755.so, \
-    $(PRODUCT_COPY_FILES))
+PRODUCT_MANUFACTURER := Meizu
+
+PRODUCT_GMS_CLIENTID_BASE := android-meizu
+
+# Shipped with Android 7.0.
+PRODUCT_SHIPPING_API_LEVEL := 24
+
+# Force full Treble (linker namespaces, split sepolicy, VINTF enforcement)
+# without raising the shipping API level.
+PRODUCT_FULL_TREBLE_OVERRIDE := true
+
 PRODUCT_CHARACTERISTICS := phone
-# Do not publish the sensors and soundtrigger HALs.
-PRODUCT_PACKAGES := $(filter-out \
-    android.hardware.sensors@1.0-impl.mtk \
-    android.hardware.sensors@1.0-service.mtk \
-    android.hardware.soundtrigger@2.0-impl \
-    ,$(PRODUCT_PACKAGES))
-PRODUCT_COPY_FILES := $(filter-out \
-    %android.hardware.sensor.accelerometer.xml:% \
-    %android.hardware.sensor.compass.xml:% \
-    %android.hardware.sensor.gyroscope.xml:% \
-    %android.hardware.sensor.light.xml:% \
-    %android.hardware.sensor.proximity.xml:% \
-    %android.hardware.sensor.stepcounter.xml:% \
-    %android.hardware.sensor.stepdetector.xml:% \
-    %sensors.mt6750.so:% \
-    %android.hardware.sensors@1.0-impl.mtk.so:% \
-    %android.hardware.sensors@1.0-service.mtk:% \
-    %android.hardware.soundtrigger@2.0-impl.so:% \
-    ,$(PRODUCT_COPY_FILES))
+
+# Boot animation
+TARGET_BOOT_ANIMATION_RES := 720
+
+# Build fingerprint
+PRODUCT_BUILD_PROP_OVERRIDES += \
+    TARGET_DEVICE=MeizuM6T \
+    PRIVATE_BUILD_DESC="Meizu_M6T_RU-user 7.0 NRD90M 1550240131 release-keys"
+
+BUILD_FINGERPRINT := Meizu/Meizu_M6T_RU/MeizuM6T:7.0/NRD90M/1550240131:user/release-keys
+
+# Dual SIM
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.radio.multisim.config=dsds \
+    ro.telephony.default_network=10,10
+
+# This branch targets Android 11 (API 30) only.
+ifneq ($(PLATFORM_SDK_VERSION),30)
+$(error M6T lineage-18.1 requires PLATFORM_SDK_VERSION=30)
+endif

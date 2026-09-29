@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Framework overlay - Meizu M6T (M6T / M811H).
+
+  The capacitive keys need a vendor stack this tree does not ship, so the
+  on-screen navigation bar is enabled. The SIM tray is hot-swappable.
+-->
+<resources>
+    <bool name="config_showNavigationBar">true</bool>
+    <bool name="config_hotswapCapable">true</bool>
+</resources>

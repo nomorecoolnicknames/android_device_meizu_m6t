@@ -1,0 +1,95 @@
+# Sensors for the Meizu M6T.
+
+on post-fs-data
+    # hwmsen control nodes the HAL writes on activate / batch / flush.
+    chmod 0660 /sys/class/misc/m_acc_misc/accenablenodata
+    chmod 0660 /sys/class/misc/m_acc_misc/accactive
+    chmod 0660 /sys/class/misc/m_acc_misc/accdelay
+    chmod 0660 /sys/class/misc/m_acc_misc/accbatch
+    chmod 0660 /sys/class/misc/m_acc_misc/accflush
+    chown system system /sys/class/misc/m_acc_misc/accenablenodata
+    chown system system /sys/class/misc/m_acc_misc/accactive
+    chown system system /sys/class/misc/m_acc_misc/accdelay
+    chown system system /sys/class/misc/m_acc_misc/accbatch
+    chown system system /sys/class/misc/m_acc_misc/accflush
+
+    chmod 0660 /sys/class/misc/m_mag_misc/magactive
+    chmod 0660 /sys/class/misc/m_mag_misc/magdelay
+    chmod 0660 /sys/class/misc/m_mag_misc/magbatch
+    chmod 0660 /sys/class/misc/m_mag_misc/magflush
+    chmod 0660 /sys/class/misc/m_mag_misc/magoactive
+    chmod 0660 /sys/class/misc/m_mag_misc/magodelay
+    chmod 0660 /sys/class/misc/m_mag_misc/magobatch
+    chmod 0660 /sys/class/misc/m_mag_misc/magoflush
+    chown system system /sys/class/misc/m_mag_misc/magactive
+    chown system system /sys/class/misc/m_mag_misc/magdelay
+    chown system system /sys/class/misc/m_mag_misc/magbatch
+    chown system system /sys/class/misc/m_mag_misc/magflush
+    # Linear acceleration and gravity virtual sensors (AKM09911 fusion).
+    chmod 0660 /sys/class/misc/m_mag_misc/maglaactive
+    chown system system /sys/class/misc/m_mag_misc/maglaactive
+    chmod 0660 /sys/class/misc/m_mag_misc/magladelay
+    chown system system /sys/class/misc/m_mag_misc/magladelay
+    chmod 0660 /sys/class/misc/m_mag_misc/maglabatch
+    chown system system /sys/class/misc/m_mag_misc/maglabatch
+    chmod 0660 /sys/class/misc/m_mag_misc/maglaflush
+    chown system system /sys/class/misc/m_mag_misc/maglaflush
+    chmod 0660 /sys/class/misc/m_mag_misc/maggractive
+    chown system system /sys/class/misc/m_mag_misc/maggractive
+    chmod 0660 /sys/class/misc/m_mag_misc/maggrdelay
+    chown system system /sys/class/misc/m_mag_misc/maggrdelay
+    chmod 0660 /sys/class/misc/m_mag_misc/maggrbatch
+    chown system system /sys/class/misc/m_mag_misc/maggrbatch
+    chmod 0660 /sys/class/misc/m_mag_misc/maggrflush
+    chown system system /sys/class/misc/m_mag_misc/maggrflush
+    chown system system /sys/class/misc/m_mag_misc/magoactive
+    chown system system /sys/class/misc/m_mag_misc/magodelay
+    chown system system /sys/class/misc/m_mag_misc/magobatch
+    chown system system /sys/class/misc/m_mag_misc/magoflush
+
+    chmod 0660 /sys/class/misc/m_batch_misc/batchactive
+    chmod 0660 /sys/class/misc/m_batch_misc/batchdelay
+    chmod 0660 /sys/class/misc/m_batch_misc/batchbatch
+    chmod 0660 /sys/class/misc/m_batch_misc/batchflush
+    chown system system /sys/class/misc/m_batch_misc/batchactive
+    chown system system /sys/class/misc/m_batch_misc/batchdelay
+    chown system system /sys/class/misc/m_batch_misc/batchbatch
+    chown system system /sys/class/misc/m_batch_misc/batchflush
+
+    chmod 0660 /sys/class/misc/m_alsps_misc/alsactive
+    chmod 0660 /sys/class/misc/m_alsps_misc/alsdelay
+    chmod 0660 /sys/class/misc/m_alsps_misc/alsbatch
+    chmod 0660 /sys/class/misc/m_alsps_misc/alsflush
+    chmod 0660 /sys/class/misc/m_alsps_misc/psactive
+    chmod 0660 /sys/class/misc/m_alsps_misc/psdelay
+    chmod 0660 /sys/class/misc/m_alsps_misc/psbatch
+    chmod 0660 /sys/class/misc/m_alsps_misc/psflush
+    chown system system /sys/class/misc/m_alsps_misc/alsactive
+    chown system system /sys/class/misc/m_alsps_misc/alsdelay
+    chown system system /sys/class/misc/m_alsps_misc/alsbatch
+    chown system system /sys/class/misc/m_alsps_misc/alsflush
+    chown system system /sys/class/misc/m_alsps_misc/psactive
+    chown system system /sys/class/misc/m_alsps_misc/psdelay
+    chown system system /sys/class/misc/m_alsps_misc/psbatch
+    chown system system /sys/class/misc/m_alsps_misc/psflush
+
+    chmod 0660 /sys/class/misc/m_step_c_misc/step_cactive
+    chmod 0660 /sys/class/misc/m_step_c_misc/step_cdelay
+    chmod 0660 /sys/class/misc/m_step_c_misc/step_cbatch
+    chmod 0660 /sys/class/misc/m_step_c_misc/step_cflush
+    chown system system /sys/class/misc/m_step_c_misc/step_cactive
+    chown system system /sys/class/misc/m_step_c_misc/step_cdelay
+    chown system system /sys/class/misc/m_step_c_misc/step_cbatch
+    chown system system /sys/class/misc/m_step_c_misc/step_cflush
+
+# No compass daemon: the AKM09911 needs none, and stock never starts akmd09911.
+
+# sensors@1.0 with group input. `override` must precede `interface`.
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    override
+    interface android.hardware.sensors@1.0::ISensors default
+    class hal
+    user system
+    group system wakelock uhid context_hub input
+    capabilities BLOCK_SUSPEND
+    rlimit rtprio 10 10
